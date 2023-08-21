@@ -6,7 +6,8 @@ const DAY_IN_MS = 86_400_000;
 
 export const checkSubscription = async () => {
   const { userId } = auth();
-
+try{
+  
   if (!userId) {
     return false;
   }
@@ -31,5 +32,11 @@ export const checkSubscription = async () => {
     userSubscription.stripePriceId &&
     userSubscription.stripeCurrentPeriodEnd?.getTime()! + DAY_IN_MS > Date.now()
 
-  return !!isValid;
+    return !!isValid;
+
+} catch(err) {
+
+  console.log(err)
+}
+
 };
