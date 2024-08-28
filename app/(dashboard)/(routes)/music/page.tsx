@@ -36,10 +36,7 @@ const MusicPage = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setMusic(undefined);
-
       const response = await axios.post('/api/music', values);
-      console.log(response)
-
       setMusic(response.data.audio);
       form.reset();
     } catch (error: any) {
@@ -53,68 +50,81 @@ const MusicPage = () => {
     }
   }
 
-  return ( 
-    <div>
+  return (
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-emerald-50 to-white">
       <Heading
-        title="Music Generation"
-        description="Turn your prompt into music."
+        title="AI Music Composer"
+        description="Transform your ideas into melodious tunes."
         icon={Music}
         iconColor="text-emerald-500"
         bgColor="bg-emerald-500/10"
       />
-      <div className="px-4 lg:px-8">
+      <div className="flex-grow px-4 lg:px-8 space-y-6">
         <Form {...form}>
           <form 
             onSubmit={form.handleSubmit(onSubmit)} 
             className="
               rounded-lg 
-              border 
+              border-2
+              border-emerald-200
               w-full 
               p-4 
               px-3 
               md:px-6 
-              focus-within:shadow-sm
-              grid
-              grid-cols-12
-              gap-2
+              focus-within:shadow-lg
+              transition-shadow
+              duration-300
+              space-y-4
             "
           >
-            <FormField
+            
+            {!music && !isLoading && (
+          <Empty label="Your symphony awaits! Start composing with AI." />
+        )}
+        <FormField
               name="prompt"
               render={({ field }) => (
-                <FormItem className="col-span-12 lg:col-span-10">
-                  <FormControl className="m-0 p-0">
+                <FormItem>
+                  <FormControl>
                     <Input
-                      className="border-0 outline-none focus-visible:ring-0 focus-visible:ring-transparent"
+                      className="border-2 focus:border-emerald-500 rounded-full py-6 px-4"
                       disabled={isLoading} 
-                      placeholder="Piano solo" 
+                      placeholder="Describe your musical idea (e.g., 'Upbeat jazz piano solo')" 
                       {...field}
                     />
                   </FormControl>
                 </FormItem>
               )}
             />
-            <Button className="col-span-12 lg:col-span-2 w-full" type="submit" disabled={isLoading} size="icon">
-              Generate
+            <Button 
+              className="w-full rounded-full py-6 bg-emerald-500 hover:bg-emerald-600 transition-colors duration-300" 
+              type="submit" 
+              disabled={isLoading}
+            >
+              
+              {isLoading ? (
+                <Loader />
+              ) : (
+                <>
+                  Compose <Music className="w-4 h-4 ml-2" />
+                </>
+              )}
             </Button>
           </form>
         </Form>
-        {isLoading && (
-          <div className="p-20">
-            <Loader />
-          </div>
-        )}
-        {!music && !isLoading && (
-          <Empty label="No music generated." />
-        )}
+        
         {music && (
-          <audio controls className="w-full mt-8">
-            <source src={music} />
-          </audio>
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-2xl font-bold mb-4 text-emerald-700">Your AI-Generated Masterpiece</h2>
+            <audio controls className="w-full">
+              <source src={music} />
+              Your browser does not support the audio element.
+            </audio>
+          </div>
         )}
       </div>
     </div>
-   );
+  );
 }
  
 export default MusicPage;

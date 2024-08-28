@@ -9,7 +9,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { FreeCounter } from "@/components/free-counter";
 
-const poppins = Montserrat ({ weight: '600', subsets: ['latin'] });
+const montserrat = Montserrat({ weight: '600', subsets: ['latin'] });
 
 const routes = [
   {
@@ -65,38 +65,50 @@ export const Sidebar = ({
   const pathname = usePathname();
 
   return (
-    <div className="space-y-4 py-4 flex flex-col h-full bg-[#111827] text-white">
-      <div className="px-3 py-2 flex-1">
-        <Link href="/dashboard" className="flex items-center pl-3 mb-14">
-          <div className="relative h-8 w-8 mr-4">
-            <Image fill alt="Logo" src="/logo.png" />
+    <div className="flex flex-col h-full bg-gradient-to-b from-gray-900 to-gray-800 text-white">
+      <div className="px-6 py-8 ">
+        <Link href="/dashboard" className="flex flex-col items-center space-y-4">
+          <div className="relative h-16 w-16 rounded-full overflow-hidden border-4 border-white shadow-lg">
+            {/* <Image fill alt="Logo" src="/logo.png" className="object-cover" /> */}
           </div>
-          <h1 className={cn("text-2xl font-bold", poppins.className)}>
-            Genius
+          <h1 className={cn("text-2xl font-bold text-white text-center", montserrat.className)}>
+            Gen AI
           </h1>
         </Link>
-        <div className="space-y-1">
+      </div>
+      <div className="flex-1 px-3 py-4">
+        <nav className="space-y-1">
           {routes.map((route) => (
             <Link
-              key={route.href} 
+              key={route.href}
               href={route.href}
               className={cn(
-                "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:text-white hover:bg-white/10 rounded-lg transition",
-                pathname === route.href ? "text-white bg-white/10" : "text-zinc-400",
+                "flex items-center px-3 py-2 text-sm rounded-md transition-all duration-200 ease-in-out",
+                pathname === route.href 
+                  ? "bg-gray-700 text-white shadow-lg" 
+                  : "text-gray-300 hover:bg-gray-700/50 hover:text-white"
               )}
             >
-              <div className="flex items-center flex-1">
-                <route.icon className={cn("h-5 w-5 mr-3", route.color)} />
-                {route.label}
+              <div className={cn(
+                "flex items-center justify-center w-8 h-8 rounded-md mr-3",
+                pathname === route.href ? route.color : "bg-gray-800"
+              )}>
+                <route.icon className={cn("h-5 w-5", pathname === route.href ? "text-white" : route.color)} />
               </div>
+              <span className="flex-1">{route.label}</span>
+              {pathname === route.href && (
+                <div className="w-1.5 h-8 bg-white rounded-full ml-3" />
+              )}
             </Link>
           ))}
-        </div>
+        </nav>
       </div>
-      <FreeCounter 
-        apiLimitCount={apiLimitCount} 
-        isPro={isPro}
-      />
+      <div className="mt-auto px-4 py-6">
+        <FreeCounter 
+          apiLimitCount={apiLimitCount} 
+          isPro={isPro}
+        />
+      </div>
     </div>
   );
 };

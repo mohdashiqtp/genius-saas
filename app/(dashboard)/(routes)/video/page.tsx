@@ -4,13 +4,14 @@ import * as z from "zod";
 import axios from "axios";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Download, FileAudio, Wand2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
-import { FileAudio } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { Heading } from "@/components/heading";
 import { Button } from "@/components/ui/button";
+import { Card, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Loader } from "@/components/loader";
@@ -20,9 +21,9 @@ import { useProModal } from "@/hooks/use-pro-modal";
 import { formSchema } from "./constants";
 
 const VideoPage = () => {
-  const router = useRouter();
   const proModal = useProModal();
-  const [video, setVideo] = useState<string>();
+  const router = useRouter();
+  const [video, setVideo] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -35,12 +36,9 @@ const VideoPage = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      setVideo(undefined);
-
+      setVideo(null);
       const response = await axios.post('/api/video', values);
-
       setVideo(response.data[0]);
-      form.reset();
     } catch (error: any) {
       if (error?.response?.status === 403) {
         proModal.onOpen();
@@ -53,15 +51,15 @@ const VideoPage = () => {
   }
 
   return ( 
-    <div>
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-orange-50 to-white">
       <Heading
-        title="Video Generation"
-        description="Turn your prompt into video."
+        title="AI Video Generator"
+        description="Transform your ideas into captivating videos."
         icon={FileAudio}
         iconColor="text-orange-700"
         bgColor="bg-orange-700/10"
       />
-      <div className="px-4 lg:px-8">
+      <div className="flex-grow px-4 lg:px-8">
         <Form {...form}>
           <form 
             onSubmit={form.handleSubmit(onSubmit)} 
@@ -73,43 +71,54 @@ const VideoPage = () => {
               px-3 
               md:px-6 
               focus-within:shadow-sm
-              grid
-              grid-cols-12
-              gap-2
+              space-y-4
             "
           >
-            <FormField
+           
+            {!video && !isLoading && (
+          <Empty label="Your video masterpiece awaits! Start generating now." />
+        )}
+         <FormField
               name="prompt"
               render={({ field }) => (
-                <FormItem className="col-span-12 lg:col-span-10">
-                  <FormControl className="m-0 p-0">
+                <FormItem>
+                  <FormControl>
                     <Input
-                      className="border-0 outline-none focus-visible:ring-0 focus-visible:ring-transparent"
+                      className="border-2 focus:border-orange-500 rounded-full py-6 px-4"
                       disabled={isLoading} 
-                      placeholder="Clown fish swimming in a coral reef" 
+                      placeholder="Clown fish swimming in a coral reef..." 
                       {...field}
                     />
                   </FormControl>
                 </FormItem>
               )}
             />
-            <Button className="col-span-12 lg:col-span-2 w-full" type="submit" disabled={isLoading} size="icon">
-              Generate
+            <Button className="w-full rounded-full py-6" type="submit" disabled={isLoading}>
+              {isLoading ? (
+                <Loader />
+              ) : (
+                <>
+                  Generate <Wand2 className="w-4 h-4 ml-2" />
+                </>
+              )}
             </Button>
           </form>
         </Form>
-        {isLoading && (
-          <div className="p-20">
-            <Loader />
-          </div>
-        )}
-        {!video && !isLoading && (
-          <Empty label="No video files generated." />
-        )}
+        
         {video && (
-          <video controls className="w-full aspect-video mt-8 rounded-lg border bg-black">
-            <source src={video} />
-          </video>
+          <div className="mt-8">
+            <Card className="rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <video controls className="w-full aspect-video">
+                <source src={video} />
+              </video>
+              <CardFooter className="p-4">
+                <Button onClick={() => window.open(video || undefined)} variant="secondary" className="w-full rounded-full">
+                  <Download className="h-4 w-4 mr-2" />
+                  Download
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
         )}
       </div>
     </div>

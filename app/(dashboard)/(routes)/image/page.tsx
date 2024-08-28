@@ -5,7 +5,7 @@ import axios from "axios";
 import Image from "next/image";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Download, ImageIcon } from "lucide-react";
+import { Download, ImageIcon, Wand2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
@@ -41,11 +41,8 @@ const PhotoPage = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setPhotos([]);
-
       const response = await axios.post('/api/image', values);
-
       const urls = response.data.map((image: { url: string }) => image.url);
-
       setPhotos(urls);
     } catch (error: any) {
       if (error?.response?.status === 403) {
@@ -59,15 +56,15 @@ const PhotoPage = () => {
   }
 
   return ( 
-    <div>
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-purple-50 to-white">
       <Heading
-        title="Image Generation"
-        description="Turn your prompt into an image."
+        title="AI Image Generator"
+        description="Transform your imagination into stunning visuals."
         icon={ImageIcon}
-        iconColor="text-pink-700"
-        bgColor="bg-pink-700/10"
+        iconColor="text-purple-700"
+        bgColor="bg-purple-700/10"
       />
-      <div className="px-4 lg:px-8">
+      <div className="flex-grow px-4 lg:px-8">
         <Form {...form}>
           <form 
             onSubmit={form.handleSubmit(onSubmit)} 
@@ -79,111 +76,108 @@ const PhotoPage = () => {
               px-3 
               md:px-6 
               focus-within:shadow-sm
-              grid
-              grid-cols-12
-              gap-2
+              space-y-4
             "
           >
+            {photos.length === 0 && !isLoading && (
+          <Empty label="Your masterpiece awaits! Start generating images." />
+        )}
             <FormField
               name="prompt"
               render={({ field }) => (
-                <FormItem className="col-span-12 lg:col-span-6">
-                  <FormControl className="m-0 p-0">
+                <FormItem>
+                  <FormControl>
                     <Input
-                      className="border-0 outline-none focus-visible:ring-0 focus-visible:ring-transparent"
+                      className="border-2 focus:border-purple-500 rounded-full py-6 px-4"
                       disabled={isLoading} 
-                      placeholder="A picture of a horse in Swiss alps" 
+                      placeholder="A serene landscape with a unicorn under a rainbow..." 
                       {...field}
                     />
                   </FormControl>
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem className="col-span-12 lg:col-span-2">
-                  <Select 
-                    disabled={isLoading} 
-                    onValueChange={field.onChange} 
-                    value={field.value} 
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue defaultValue={field.value} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {amountOptions.map((option) => (
-                        <SelectItem 
-                          key={option.value} 
-                          value={option.value}
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormItem>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <FormField
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <Select 
+                      disabled={isLoading} 
+                      onValueChange={field.onChange} 
+                      value={field.value} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="rounded-full">
+                          <SelectValue defaultValue={field.value} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {amountOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="resolution"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <Select 
+                      disabled={isLoading} 
+                      onValueChange={field.onChange} 
+                      value={field.value} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="rounded-full">
+                          <SelectValue defaultValue={field.value} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {resolutionOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+            </div>
+            <Button className="w-full rounded-full py-6" type="submit" disabled={isLoading}>
+              {isLoading ? (
+                <Loader />
+              ) : (
+                <>
+                  Generate <Wand2 className="w-4 h-4 ml-2" />
+                </>
               )}
-            />
-            <FormField
-              control={form.control}
-              name="resolution"
-              render={({ field }) => (
-                <FormItem className="col-span-12 lg:col-span-2">
-                  <Select 
-                    disabled={isLoading} 
-                    onValueChange={field.onChange} 
-                    value={field.value} 
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue defaultValue={field.value} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {resolutionOptions.map((option) => (
-                        <SelectItem 
-                          key={option.value} 
-                          value={option.value}
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormItem>
-              )}
-            />
-            <Button className="col-span-12 lg:col-span-2 w-full" type="submit" disabled={isLoading} size="icon">
-              Generate
             </Button>
           </form>
         </Form>
-        {isLoading && (
-          <div className="p-20">
-            <Loader />
-          </div>
-        )}
-        {photos.length === 0 && !isLoading && (
-          <Empty label="No images generated." />
-        )}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-8">
-          {photos.map((src) => (
-            <Card key={src} className="rounded-lg overflow-hidden">
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+          {photos.map((src, index) => (
+            <Card key={index} className="rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
               <div className="relative aspect-square">
                 <Image
                   fill
                   alt="Generated"
                   src={src}
+                  className="object-cover"
                 />
               </div>
-              <CardFooter className="p-2">
-                <Button onClick={() => window.open(src)} variant="secondary" className="w-full">
+              <CardFooter className="p-4">
+                <Button onClick={() => window.open(src)} variant="secondary" className="w-full rounded-full">
                   <Download className="h-4 w-4 mr-2" />
                   Download
                 </Button>
